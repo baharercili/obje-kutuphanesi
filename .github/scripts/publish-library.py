@@ -3,6 +3,7 @@ import concurrent.futures as cf
 import datetime
 import gzip
 import hashlib
+import http.client
 import json
 import os
 from pathlib import Path
@@ -106,9 +107,9 @@ def request(url, data=None, method='GET', api=False, binary=False):
             if error.code not in {429, 500, 502, 503, 504} or attempt == 5:
                 raise RuntimeError(f'HTTP {error.code} during {method} {urllib.parse.urlsplit(url).path}') from None
             time.sleep(min(60, max(2 ** attempt, int(error.headers.get('Retry-After', '0')))))
-        except (TimeoutError, OSError):
+        except (TimeoutError, OSError, http.client.HTTPException):
             if attempt == 5:
-                raise RuntimeError('Transfer timed out: ' + urllib.parse.urlsplit(url).path) from None
+                raise RuntimeError('Transfer interrupted: ' + urllib.parse.urlsplit(url).path) from None
             time.sleep(min(30, 2 ** attempt))
 
 def source_binary(row):
@@ -218,7 +219,13 @@ def transfer(task):
     if len(body) != row['bytes'] or hashlib.sha256(body).hexdigest() != row['sha256']:
         raise ValueError('Source integrity mismatch: ' + row['filename'])
     url = release['upload_url'].split('{')[0] + '?name=' + urllib.parse.quote(row['filename'])
-    asset = request(url, body, method='POST', api=True, binary=True)
+    try:
+        asset = request(url, body, method='POST', api=True, binary=True)
+    except RuntimeError:
+        # A complete upload can survive a lost HTTP response; never replace it.
+        asset = assets(release).get(row['filename'], {})
+        if not verified(asset, row):
+            raise
     if not verified(asset, row):
         raise ValueError('Uploaded asset integrity mismatch: ' + row['filename'])
     return {'id': row['id'], 'sha256': row['sha256'], 'asset_id': asset['id']}
