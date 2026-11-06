@@ -1,9 +1,17 @@
 # Obje Kütüphanesi
 
+[Uygulamayı aç](https://baharercili.github.io/obje-kutuphanesi/)
+
 Zara Home ve H&M Home ürünlerinin malzemeli 3D modellerini, Hipicon görsel seçkisini ve orijinal ürün fotoğraflarını bir araya getiren tarayıcı uygulaması.
 
-Ana koleksiyonda marka, kategori ve ürün adıyla arama yapılır. Hipicon ürünleri seçkiye eklenebilir, listeden gizlenebilir ve geri getirilebilir. Bu tercihler kullanılan tarayıcıda saklanır.
+Ana koleksiyonda marka, kategori ve ürün adıyla arama yapılır. Her markanın ayrı sayfasına da geçilebilir. Hipicon ürünleri seçkiye eklenebilir, listeden gizlenebilir ve geri getirilebilir. Bu tercihler kullanılan tarayıcıda saklanır; başka cihazlara kendiliğinden taşınmaz.
 
-Kayıtlı model kapsamı: 1.234 Zara Home ve 1.375 H&M Home GLB varyantı. Hipicon görsel arşivi 561 ürün içerir; bu ürünler için 3D model üretilmemiştir. Modeller ürün fotoğrafları ve yayımlanan ölçülerden yaklaşık olarak yeniden oluşturulmuştur.
+- 1.234 Zara Home GLB modeli
+- 1.375 H&M Home GLB modeli
+- 561 Hipicon görsel kaydı; bu kayıtlar için 3D model üretilmemiştir
 
-Tarayıcı görünümü için hazırlanan sürümler ile indirilebilir tam GLB dosyaları ayrıdır. Tam dosyaların Releases bölümüne aktarımı sürüyor. Çalışan web sürümü henüz yayımlanmadı. GLB dosyaları gömülü yüzey malzemelerini içerir. Orijinal ürün görselleri ve marka adları ilgili sahiplerine aittir.
+Ürün ve varyant satırları ile GLB dosyalarının sayısı aynı değildir. Modeller ürün fotoğrafları ve yayımlanan ölçülerden yaklaşık olarak yeniden oluşturulmuştur.
+
+Tarayıcıda kullanılan önizlemeler ayrı hazırlanmıştır. İndirilebilir özgün GLB dosyaları gömülü yüzey malzemelerini içerir ve [Releases](https://github.com/baharercili/obje-kutuphanesi/releases) bölümünde saklanır. Tüm 2.609 özgün dosyanın boyutu ve SHA-256 özeti yayımlama sırasında doğrulanmıştır; kayıt `publish-receipt.json` dosyasındadır.
+
+Uygulama GitHub Pages üzerinde çalışır; bilgisayarda açık bir sunucuya ihtiyaç duymaz. Orijinal ürün görselleri ve marka adları ilgili sahiplerine aittir.
