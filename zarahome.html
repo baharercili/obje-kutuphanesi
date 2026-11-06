@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#f5f3ed">
+  <meta name="description" content="Zara Home referanslarından yeniden modellenmiş 1234 materyalli dekorasyon objesi varyantını 3D incele ve projelerinde kullanmak için indir.">
+  <title>Obje Kütüphanesi</title>
+  <link rel="stylesheet" href="./style.css">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='8' fill='%23626b59'./%3E%3Ctext x='20' y='27' text-anchor='middle' font-family='Georgia' font-size='24' fill='%23f5f3ed'%3EO%3C/text%3E%3C/svg%3E">
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="./index.html" aria-label="Obje Kütüphanesi ana sayfa"><span class="brand-mark">O</span><span>Obje Kütüphanesi<small>3D obje koleksiyonu</small></span></a>
+    <nav aria-label="Ana menü"><a href="./index.html#koleksiyon">Koleksiyon</a><a href="./zarahome.html">Zara Home</a><a href="./hmhome.html">H&amp;M Home</a><a href="./hipicon.html">Hipicon</a><span class="private-label">Tarayıcı uygulaması</span></nav>
+  </header>
+  <main>
+    <section class="intro" aria-labelledby="page-title">
+      <div><p class="eyebrow">Zara Home referans koleksiyonu</p><h1 id="page-title">Malzemeleriyle dekorasyon koleksiyonu.</h1><p class="intro-copy">Bir model seç, her açıdan incele ve projene taşı.</p></div>
+      <p class="collection-count"><strong>1234</strong><span>hazır boy ve renk varyantı<br>29 kategori</span></p>
+    </section>
+    <section id="vase-app" class="catalog" aria-label="Üç boyutlu obje kütüphanesi">
+      <aside class="collection-sidebar" id="koleksiyon" aria-label="Ürün seçimi">
+        <div class="sidebar-header"><h2>Koleksiyon</h2><span data-category-count data-results-count>1234 model</span></div>
+        <label class="field-label" for="category">Kategori</label>
+        <select id="category" data-category aria-label="Ürün kategorisi"></select>
+        <label class="search-field" for="product-search"><span class="search-symbol" aria-hidden="true">⌕</span><input id="product-search" data-search type="search" placeholder="Ürün adı veya ürün kodu" aria-label="Ürün adı veya ürün koduyla ara" autocomplete="off"></label>
+        <div class="mobile-picker"><label class="field-label" for="model">Ürün ve boy</label><select id="model" data-model aria-label="İncelenecek ürün"></select></div>
+        <div class="model-list" data-model-list aria-label="Ürünler"></div>
+        <p class="sidebar-footnote" data-coverage-note>Burada hazır 3D modeller gösteriliyor. İncelenen kategorilerde modelleme bekleyen ürünler de var.</p>
+        <a class="reference-catalog-link" data-category-inventory href="./zarahome-secki.html">Bu kategorinin tüm kaynak ürünleri ve eksikleri ↗</a>
+        <a class="reference-catalog-link" href="./hipicon.html">Hipicon görsel seçkisini aç ↗</a>
+      </aside>
+      <div class="workspace">
+        <header class="model-header"><div><p class="model-code" data-sku>Model hazırlanıyor</p><h2 data-model-name>Model önizlemesi</h2></div><span class="view-tag" data-model-quality>3D görünüm</span></header>
+        <div class="comparison-grid" aria-label="Orijinal ürün fotoğrafı ve 3D model karşılaştırması">
+          <figure class="reference-pane">
+            <figcaption class="pane-heading"><span>Orijinal ürün fotoğrafı</span><a data-reference-full target="_blank" rel="noopener noreferrer" hidden>Fotoğrafı aç ↗</a></figcaption>
+            <div class="reference-stage" data-reference-stage aria-busy="true">
+              <img data-reference-image alt="" decoding="async" referrerpolicy="no-referrer" hidden>
+              <p class="reference-status" data-reference-status role="status">Ürün fotoğrafı yükleniyor…</p>
+              <div class="reference-navigation" data-reference-navigation hidden><button type="button" data-reference-prev aria-label="Önceki ürün fotoğrafı">‹</button><span data-reference-count aria-live="polite"></span><button type="button" data-reference-next aria-label="Sonraki ürün fotoğrafı">›</button></div>
+            </div>
+            <div class="reference-thumbnails" data-reference-thumbnails aria-label="Ürünün diğer orijinal fotoğrafları"></div>
+            <p class="reference-caption" data-reference-caption>Zara Home · resmi ürün fotoğrafı</p>
+          </figure>
+          <div class="model-pane">
+            <div class="pane-heading"><span>3D model</span><span class="pane-hint">Sürükle ve döndür</span></div>
+            <div class="vase-stage" aria-busy="true"><canvas role="img" draggable="false" aria-label="Ürünün malzemeleriyle üç boyutlu görünümü"></canvas><div class="vase-loading" role="status">Koleksiyon yükleniyor…</div><span class="stage-note">Sürükle ve döndür</span></div>
+            <div class="view-toolbar" aria-label="Model görünümü"><div><button type="button" data-rotate="left" aria-label="Modeli sola döndür">↶</button><button type="button" data-rotate="right" aria-label="Modeli sağa döndür">↷</button></div><span class="toolbar-divider"></span><div><button type="button" data-zoom="out" aria-label="Uzaklaş">−</button><button type="button" data-zoom="in" aria-label="Yakınlaş">+</button></div><button class="reset-view" type="button" data-reset>Görünümü sıfırla</button></div>
+          </div>
+        </div>
+        <section class="model-details" aria-label="Seçilen modelin bilgileri">
+          <div class="specs"><div><span class="spec-label">Ölçüler</span><p data-dimensions>—</p><small data-size-origin></small></div><div><span class="spec-label">Malzeme</span><p data-material>—</p><small>Malzemeler model dosyasının içinde.</small></div></div>
+          <div class="model-actions"><a class="download-button" data-download download>Tam GLB modelini indir <span aria-hidden="true">↓</span></a><a class="source-link" data-source target="_blank" rel="noopener noreferrer">Ürün referansı ↗</a></div>
+        </section>
+        <details class="source-detail" data-source-detail hidden><summary>Ölçü ve modelleme notu</summary><p data-source-notes></p><a data-size-source target="_blank" rel="noopener noreferrer" hidden>Resmi ölçü sayfası ↗</a></details>
+        <span class="sr-only" data-announcement aria-live="polite"></span>
+      </div>
+    </section>
+    <section class="usage" id="kullanim"><div><p class="eyebrow">Projende kullan</p><h2>Seç. İncele. Yerleştir.</h2></div><div><p>İndirdiğin GLB dosyası, geometriyi ve yüzey malzemelerini birlikte taşır. GLB destekleyen 3D uygulamana aktararak kullanabilirsin.</p><p class="usage-note">Ölçek metre, yukarı eksen Y, yerleştirme noktası taban merkezidir. Form ve yüzey ayrıntıları, ürün görselleri ve yayımlanan ölçüler üzerinden yaklaşık olarak yeniden modellenmiştir.</p></div></section>
+  </main>
+  <footer class="site-footer"><span>Obje Kütüphanesi</span><span>Koleksiyon kaydı · 21 Ekim 2026</span></footer>
+  <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"}}</script>
+  <script type="module" src="./app.js"></script>
+</body>
+</html>

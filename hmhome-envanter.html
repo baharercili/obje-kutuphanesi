@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#f5f3ed">
+  <title>H&M Home Envanteri · Obje Kütüphanesi</title>
+  <meta name="description" content="H&M Home kaynak ürünleri, orijinal fotoğrafları ve model hazırlık durumları.">
+  <link rel="stylesheet" href="./hipicon.css">
+  <link rel="stylesheet" href="./hmhome-inventory.css">
+  <link rel="stylesheet" href="./collection.css">
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="./index.html"><span class="brand-mark">O</span><span>Obje Kütüphanesi<small>3D obje koleksiyonu</small></span></a>
+    <nav aria-label="Ana menü"><a href="./index.html#koleksiyon">Koleksiyon</a><a href="./zarahome.html">Zara Home</a><a href="./hmhome.html">H&amp;M Home</a><a href="./hipicon.html">Hipicon</a><span class="private-label">Tarayıcı uygulaması</span></nav>
+  </header>
+  <main>
+    <section class="intro" aria-labelledby="page-title">
+      <div><p class="eyebrow">H&M Home · Kaynak envanteri</p><h1 id="page-title" data-inventory-title>H&amp;M Home koleksiyonu genişliyor.</h1><p class="intro-copy">Yeni taranan ürünler orijinal görselleriyle ekleniyor. Hazır 3D modeller, modelleme bekleyenler ve ölçü bilgisi eksikleri ayrı gösteriliyor.</p></div>
+      <div class="intro-note"><p><strong data-summary>Envanter yükleniyor…</strong><span data-model-scope>Kayıtlı ürünlerin durumu yükleniyor…</span></p></div>
+    </section>
+    <section id="koleksiyon" aria-label="H&M Home ürün envanteri">
+      <div class="filters">
+        <label class="search-field"><span aria-hidden="true">⌕</span><input data-search type="search" placeholder="Ürün adı veya ürün kodu" aria-label="Ürün adı veya ürün koduyla ara"></label>
+        <label class="source-field"><span class="sr-only">Kategori</span><select data-category aria-label="Kategori"><option value="all">Tüm kategoriler</option></select></label>
+        <label class="status-field"><span class="sr-only">Model durumu</span><select data-status aria-label="Model durumu"><option value="all">Tüm durumlar</option><option value="ready">3D modeli hazır</option><option value="pending">Modeli henüz hazır değil</option><option value="pending_model">Ölçüsü hazır, modelleme bekliyor</option><option value="pending_measurements">Ölçü bilgisi bekliyor</option><option value="pending_research">Form ve ölçü araştırması bekliyor</option></select></label>
+      </div>
+      <div class="collection-meta"><p data-results role="status" aria-live="polite">Ürünler yükleniyor…</p><a class="reference-label" data-category-source target="_blank" rel="noopener noreferrer" hidden>Resmî kategori kaynağı ↗</a></div>
+      <p class="notice" data-error role="alert" hidden></p>
+      <div class="gallery" data-gallery aria-busy="true"></div>
+      <div class="load-more"><p data-page-count></p><button class="quiet-button" data-inventory-more hidden>Daha fazla ürün göster</button></div>
+      <div class="empty-state" data-empty hidden><h2>Bu filtrelerde ürün yok.</h2><p>Başka bir kategori veya durum seçebilirsin.</p><button class="quiet-button" data-reset>Filtreleri temizle</button></div>
+    </section>
+    <section class="sources-section" id="kapsam">
+      <div><p class="eyebrow">Kapsam</p><h2>Hangi kategori ne kadar hazır?</h2><p>Kaynak taraması ile modelleme iki ayrı aşama. Fotoğrafı kaydedilen ürünün modeli henüz hazır olmayabilir. Kategori toplamları birbiriyle örtüşebilir; aynı ürün genel sayıda bir kez sayılır.</p></div>
+      <div class="coverage-scroll"><table class="coverage-table"><caption class="sr-only">Kategori kapsamı</caption><thead><tr><th>Kategori</th><th>Kaydedilen ürün</th><th>Modeli hazır ürün</th><th>GLB varyantı</th><th>Bekleyen</th></tr></thead><tbody data-coverage></tbody></table></div>
+    </section>
+    <section class="scope-overview"><h2>Takip edilen bütün kaynak kategorileri</h2><p>Doğrulanmamış veya erişilemeyen bir kategori tamamlandı sayılmaz.</p><ul class="source-progress" data-source-progress></ul></section>
+  </main>
+  <dialog data-detail aria-labelledby="detail-title"><div class="dialog-shell">
+    <button class="close-dialog" data-close aria-label="Ürün ayrıntısını kapat">×</button>
+    <div class="detail-gallery"><div class="detail-photo-stage"><img data-detail-image alt="" referrerpolicy="no-referrer"><p class="image-error" data-detail-error hidden>Bu ürünün orijinal görseli henüz kaydedilmedi.</p></div><div class="thumbnails" data-thumbnails aria-label="Ürünün orijinal fotoğrafları"></div></div>
+    <div class="detail-copy"><p class="eyebrow" data-detail-category></p><p class="detail-brand" data-detail-sku></p><h2 id="detail-title"></h2><p class="model-status" data-detail-status></p><p class="modeling-note" data-detail-note></p><div class="detail-links"><a data-detail-model hidden>Malzemeli 3D modeli aç ↗</a><a data-detail-source target="_blank" rel="noopener noreferrer">Resmî ürün sayfası ↗</a><a data-detail-photo target="_blank" rel="noopener noreferrer" hidden>Orijinal JPEG’yi aç ↗</a></div></div>
+  </div></dialog>
+  <footer class="site-footer"><span>Obje Kütüphanesi</span><span>H&M Home · Orijinal fotoğraflar ve 3D modeller</span></footer>
+  <script type="module" src="./hmhome-inventory.js"></script>
+</body>
+</html>

@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#f5f3ed">
+  <meta name="description" content="Hipicon markaları ve sanatçılarından dekorasyon ve tablo görsel seçkisi. Projelerin için beğendiklerini bir araya getir.">
+  <title>Hipicon görsel seçkisi · Obje Kütüphanesi</title>
+  <link rel="stylesheet" href="./hipicon.css">
+  <script defer src="./hipicon.js"></script>
+</head>
+<body>
+  <div id="hipicon-app" data-ready="false" data-product-count="0" data-selected-count="0" data-source-count="0" data-original-link-count="0">
+    <header class="site-header">
+      <a class="brand" href="./index.html" aria-label="Obje Kütüphanesi · 3D kütüphaneye dön"><span class="brand-mark" aria-hidden="true">O</span><span>Obje Kütüphanesi<small>Objeler, malzemeler ve ilham</small></span></a>
+      <nav aria-label="Ana menü"><a href="./index.html#koleksiyon">Koleksiyon</a><a href="./zarahome.html">Zara Home</a><a href="./hmhome.html">H&amp;M Home</a><a href="./hipicon.html">Hipicon</a><span class="private-label">Tarayıcı uygulaması</span></nav>
+    </header>
+    <main>
+      <section class="intro" aria-labelledby="page-title">
+        <div><p class="eyebrow">Dekorasyon &amp; sanat</p><h1 id="page-title">Hipicon görsel seçkisi</h1><p class="intro-copy">Mekâna karakter katacak parçalar. Beğendiklerini seç, projelerin için bir arada tut.</p></div>
+        <div class="intro-note"><span class="note-symbol" aria-hidden="true">◇</span><p>Şimdilik orijinal ürün görselleri.<br><strong>Seçtiğimiz parçaları ileride modelleyeceğiz.</strong></p></div>
+      </section>
+      <section class="collection" aria-label="Ürün seçkisi">
+        <div class="filters">
+          <label class="search-field"><span aria-hidden="true">⌕</span><span class="sr-only">Ürün, marka veya malzeme ara</span><input id="search" type="search" placeholder="Ürün, marka veya malzeme ara" autocomplete="off"></label>
+          <label class="source-field"><span class="sr-only">Marka veya sanatçı</span><select id="source-filter" aria-label="Marka veya sanatçı"><option value="">Tüm marka ve sanatçılar</option></select></label>
+          <button id="selected-filter" class="selected-filter" type="button" aria-pressed="false"><span class="selection-icon" aria-hidden="true">♡</span> Yalnız seçtiklerim <span id="selection-count" class="count-pill">0</span></button>
+        </div>
+        <div class="collection-meta"><p id="result-count" role="status" aria-live="polite">Seçki yükleniyor…</p><button id="hidden-filter" class="hidden-filter" type="button" aria-pressed="false">Gizlenenler <span id="hidden-count" class="count-pill">0</span></button></div>
+        <div id="visibility-notice" class="notice visibility-notice" role="status" hidden><span id="visibility-message"></span><button id="undo-visibility" type="button" hidden>Geri al</button></div>
+        <p id="selection-notice" class="notice" role="status" hidden></p>
+        <div id="gallery" class="gallery" aria-busy="true"></div>
+        <div id="empty-state" class="empty-state" hidden><span aria-hidden="true">⌕</span><h2>Bu görünümde ürün yok</h2><p id="empty-message">Başka bir kelime veya kaynakla tekrar dene.</p><button id="reset-filters" type="button" class="quiet-button">Tüm seçkiyi göster</button></div>
+        <div id="load-error" class="empty-state error-state" role="alert" hidden><h2>Seçki yüklenemedi</h2><p>Bağlantıyı kontrol edip yeniden deneyebilirsin.</p><button id="retry-load" class="primary-button" type="button">Yeniden dene</button></div>
+      </section>
+      <section id="kaynaklar" class="sources-section" aria-labelledby="sources-title">
+        <div><p class="eyebrow">Büyüyen bir kaynakça</p><h2 id="sources-title">Yeni parçalar için<br>buraya döneceğiz.</h2><p>Paylaştığın marka ve sanatçı bağlantıları, sonraki seçkileri çeşitlendirmek için burada saklanıyor.</p></div>
+        <details class="sources-details"><summary><span>Kaynak bağlantıları</span><span id="source-count" class="source-count">—</span></summary><ul id="source-links"></ul></details>
+      </section>
+    <p class="browser-storage-note">Seçimlerin ve gizlediklerin bu tarayıcıda saklanır.</p></main>
+    <footer class="site-footer"><span>Obje Kütüphanesi · Kişisel proje koleksiyonu</span><span id="updated-date">Orijinal görseller · Hipicon</span></footer>
+  </div>
+  <dialog id="product-dialog" aria-labelledby="detail-title" aria-describedby="detail-kind">
+    <div class="dialog-shell">
+      <button id="close-dialog" class="close-dialog" type="button" aria-label="Ürün ayrıntısını kapat">×</button>
+      <div class="detail-gallery"><div class="detail-photo-stage"><img id="detail-photo" alt=""><p id="detail-image-error" class="image-error" hidden>Bu görsel yüklenemedi.</p><div id="detail-navigation" class="photo-navigation"><button id="previous-photo" type="button" aria-label="Önceki fotoğraf">‹</button><span id="photo-count" aria-live="polite"></span><button id="next-photo" type="button" aria-label="Sonraki fotoğraf">›</button></div></div><div id="detail-thumbnails" class="thumbnails" role="group" aria-label="Orijinal ürün fotoğrafları"></div></div>
+      <div class="detail-copy"><p id="detail-kind" class="eyebrow">Görsel referans</p><p id="detail-brand" class="detail-brand"></p><h2 id="detail-title"></h2><dl class="detail-specs"><div><dt>Ölçüler</dt><dd id="detail-dimensions"></dd></div><div><dt>Malzeme</dt><dd id="detail-material"></dd></div></dl><p id="detail-dimension-note" class="dimension-note" hidden></p><p class="modeling-note">Bu ürün görsel referans olarak eklendi. 3D modelini daha sonra, projede kullanmaya karar verdiğimizde hazırlayacağız.</p><button id="detail-select" class="primary-button" type="button" aria-pressed="false">Seçkime ekle</button><button id="detail-visibility" class="detail-visibility" type="button">Sekmeden çıkar</button><div class="detail-links"><a id="detail-product-link" target="_blank" rel="noopener noreferrer">Hipicon'da ürünü gör <span aria-hidden="true">↗</span></a><a id="detail-source-link" target="_blank" rel="noopener noreferrer">Marka / sanatçı kaynağı <span aria-hidden="true">↗</span></a></div></div>
+    </div>
+  </dialog>
+</body>
+</html>

@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#f5f3ed">
+  <meta name="description" content="Zara Home, H&M Home ve Hipicon ürünlerini aynı koleksiyonda incele. Orijinal fotoğrafları gör, hazır malzemeli 3D modellere ulaş.">
+  <title>Tüm Koleksiyon · Obje Kütüphanesi</title>
+  <link rel="stylesheet" href="./hipicon.css">
+  <link rel="stylesheet" href="./collection.css">
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="./index.html" aria-label="Obje Kütüphanesi ana sayfa"><span class="brand-mark">O</span><span>Obje Kütüphanesi<small>Fotoğraf ve 3D obje koleksiyonu</small></span></a>
+    <nav aria-label="Ana menü"><a href="./index.html#koleksiyon" aria-current="page">Koleksiyon</a><a href="./zarahome.html">Zara Home</a><a href="./hmhome.html">H&amp;M Home</a><a href="./hipicon.html">Hipicon</a><span class="private-label">Tarayıcı uygulaması</span></nav>
+  </header>
+  <main>
+    <section class="intro" aria-labelledby="page-title">
+      <div><p class="eyebrow">Tüm markalar · Tek koleksiyon</p><h1 id="page-title">Birlikte bak.<br>İçinden seç.</h1><p class="intro-copy">Zara Home, H&amp;M Home ve Hipicon burada bir arada. Orijinal fotoğrafları karşılaştır, hazır 3D modelleri aç veya markanın kendi sayfasına geç.</p></div>
+      <div class="intro-note"><p><strong class="collection-total" data-total>—</strong><span>kayıtlı ürün ve varyant</span><span data-model-total>Hazır modeller hesaplanıyor…</span></p></div>
+    </section>
+    <div class="brand-overview" aria-label="Marka sayfaları">
+      <a href="./zarahome.html"><strong>Zara Home ↗</strong><span data-zara-summary>Fotoğraflar ve 3D modeller</span></a>
+      <a href="./hmhome-envanter.html"><strong>H&amp;M Home ↗</strong><span data-hm-summary>Koleksiyon genişletiliyor</span></a>
+      <a href="./hipicon.html"><strong>Hipicon ↗</strong><span data-hipicon-summary>Görsel seçkisi · Seçimden sonra modelleme</span></a>
+    </div>
+    <section id="koleksiyon" aria-label="Tüm markaların ortak koleksiyonu">
+      <div class="filters">
+        <label class="search-field"><span aria-hidden="true">⌕</span><input data-search type="search" placeholder="Ürün, marka veya ürün kodu ara" aria-label="Koleksiyonda ara" autocomplete="off"></label>
+        <label class="filter-field"><span class="sr-only">Marka</span><select data-brand aria-label="Marka"><option value="all">Tüm markalar</option><option value="zara">Zara Home</option><option value="hm">H&amp;M Home</option><option value="hipicon">Hipicon</option></select></label>
+        <label class="filter-field"><span class="sr-only">Kategori</span><select data-category aria-label="Kategori"><option value="all">Tüm kategoriler</option></select></label>
+        <label class="filter-field"><span class="sr-only">Model durumu</span><select data-status aria-label="Model durumu"><option value="all">Tüm durumlar</option><option value="ready">3D modeli hazır</option><option value="reference">Görsel referans / Bekleyen</option></select></label>
+      </div>
+      <div class="collection-meta"><p data-results role="status" aria-live="polite">Koleksiyon yükleniyor…</p><button class="quiet-button" data-reset>Filtreleri temizle</button></div>
+      <p class="notice" data-error role="alert" hidden>Koleksiyon açılamadı. Sayfayı yenileyebilirsin.</p>
+      <div class="gallery" data-gallery aria-busy="true"></div>
+      <div class="empty-state" data-empty hidden><h2>Bu filtrelerde ürün yok.</h2><p>Başka bir kategori veya marka seçebilirsin.</p></div>
+      <div class="load-more"><p data-page-count></p><button class="quiet-button" data-more hidden>Daha fazla göster</button></div>
+    </section>
+    <section class="scope-overview" id="kapsam"><p class="eyebrow">Koleksiyonun kapsamı</p><h2>Eklenenler ve bekleyenler birlikte.</h2><p>Bu sayfa kütüphaneye kaydedilen ürünleri gösterir. Markaların bütün katalogları henüz tamamlanmadı. “3D modeli hazır” yalnız dosyası bulunan ürünlerde görünür; görsel referanslar model olarak sayılmaz.</p><p><a href="./hmhome-envanter.html#kapsam">H&amp;M Home kategori kapsamını gör ↗</a> · <a href="./zarahome-secki.html">Zara Home kaynak envanteri ↗</a></p></section>
+  </main>
+  <dialog data-detail aria-labelledby="detail-title"><div class="dialog-shell">
+    <button class="close-dialog" data-close aria-label="Ürün ayrıntısını kapat">×</button>
+    <div class="detail-gallery"><div class="detail-photo-stage"><img data-detail-image alt="" referrerpolicy="no-referrer"><p class="image-error" data-detail-error hidden>Görsel şu anda yüklenemedi.</p></div><div class="thumbnails" data-thumbnails aria-label="Ürünün orijinal fotoğrafları"></div></div>
+    <div class="detail-copy"><p class="eyebrow" data-detail-category></p><p class="detail-brand" data-detail-brand></p><h2 id="detail-title"></h2><p class="model-status" data-detail-status></p><p class="detail-material" data-detail-dimensions></p><p class="detail-material" data-detail-material></p><p class="modeling-note" data-detail-note></p><div class="detail-links"><a data-detail-model hidden>Malzemeli 3D modeli aç ↗</a><a data-detail-source target="_blank" rel="noopener noreferrer">Orijinal ürün sayfası ↗</a><a data-detail-photo target="_blank" rel="noopener noreferrer" hidden>Orijinal fotoğrafı aç ↗</a></div></div>
+  </div></dialog>
+  <footer class="site-footer"><span>Obje Kütüphanesi</span><span>Zara Home · H&amp;M Home · Hipicon</span></footer>
+  <script type="module" src="./collection.js"></script>
+</body>
+</html>
