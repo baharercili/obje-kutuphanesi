@@ -147,8 +147,11 @@ for group in data['groups']:
         prior = uploaded.get(row['filename'])
         if prior and verified(prior, row):
             receipts.append({'id': row['id'], 'sha256': row['sha256'], 'asset_id': prior['id']})
-        elif prior and prior.get('state') == 'starter' and prior.get('digest') is None and prior['id'] in {715282711, 715251305, 715253959, 715255578}:
-            # Incomplete placeholders created by this task's four cancelled browser uploads.
+        elif (prior and prior.get('state') == 'starter' and prior.get('digest') is None
+              and prior['size'] == row['bytes']
+              and (prior['id'] in {715282711, 715251305, 715253959, 715255578}
+                   or prior.get('uploader', {}).get('login') == 'github-actions[bot]')):
+            # Retry incomplete task uploads; a completed asset is never removed here.
             request(prior['url'], method='DELETE', api=True)
             tasks.append((release, row))
         elif prior:
@@ -169,7 +172,7 @@ def transfer(task):
     return {'id': row['id'], 'sha256': row['sha256'], 'asset_id': asset['id']}
 
 print(f'Already verified {len(receipts)} originals; transferring {len(tasks)}.', flush=True)
-with cf.ThreadPoolExecutor(max_workers=4) as pool:
+with cf.ThreadPoolExecutor(max_workers=8) as pool:
     futures = [pool.submit(transfer, task) for task in tasks]
     try:
       for future in cf.as_completed(futures):
@@ -232,7 +235,7 @@ git('config', 'user.name', 'github-actions[bot]')
 git('config', 'user.email', '41898282+github-actions[bot]@users.noreply.github.com')
 packs = [row for row in rows if row['kind'] == 'pack']
 pending, size = [], 0
-with cf.ThreadPoolExecutor(max_workers=4) as pool:
+with cf.ThreadPoolExecutor(max_workers=8) as pool:
     for row in pool.map(download_web, packs):
         pending.append(row['filename'])
         size += row['bytes']
@@ -249,7 +252,7 @@ if pending:
         git('push', 'origin', 'HEAD:main')
 
 app = [row for row in rows if row['kind'] == 'app']
-with cf.ThreadPoolExecutor(max_workers=4) as pool:
+with cf.ThreadPoolExecutor(max_workers=8) as pool:
     list(pool.map(download_web, app))
 index = json.loads(Path('model-assets.json').read_text())
 if set(index['models']) != {row['id'] for group in data['groups'] for row in group['models']}:
