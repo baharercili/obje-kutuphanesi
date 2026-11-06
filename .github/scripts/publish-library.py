@@ -290,6 +290,11 @@ def download_web(row):
 def git(*args):
     subprocess.run(['git', *args], check=True)
 
+def push_verified_changes():
+    # Preserve any source/documentation commits added while the transfer ran.
+    git('pull', '--rebase', 'origin', 'main')
+    git('push', 'origin', 'HEAD:main')
+
 git('config', 'user.name', 'github-actions[bot]')
 git('config', 'user.email', '41898282+github-actions[bot]@users.noreply.github.com')
 packs = [row for row in rows if row['kind'] == 'pack']
@@ -302,13 +307,13 @@ with cf.ThreadPoolExecutor(max_workers=12) as pool:
             git('add', '--', *pending)
             if subprocess.run(['git', 'diff', '--cached', '--quiet']).returncode:
                 git('commit', '-m', 'Add verified browser model packs')
-                git('push', 'origin', 'HEAD:main')
+                push_verified_changes()
             pending, size = [], 0
 if pending:
     git('add', '--', *pending)
     if subprocess.run(['git', 'diff', '--cached', '--quiet']).returncode:
         git('commit', '-m', 'Add remaining verified browser model packs')
-        git('push', 'origin', 'HEAD:main')
+        push_verified_changes()
 
 app = [row for row in rows if row['kind'] == 'app']
 with cf.ThreadPoolExecutor(max_workers=12) as pool:
@@ -329,7 +334,7 @@ Path('publish-receipt.json').write_text(json.dumps(receipt, separators=(',', ':'
 git('add', '--', *[row['filename'] for row in app], 'publish-receipt.json')
 if subprocess.run(['git', 'diff', '--cached', '--quiet']).returncode:
     git('commit', '-m', 'Publish complete three-brand browser library and verification receipt')
-    git('push', 'origin', 'HEAD:main')
+    push_verified_changes()
 out = Path('_site')
 out.mkdir(exist_ok=True)
 for row in app:
