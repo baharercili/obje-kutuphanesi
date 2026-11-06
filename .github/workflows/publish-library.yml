@@ -9,27 +9,51 @@ on:
         type: string
 
 permissions:
-  contents: write
-  pages: write
-  id-token: write
+  contents: read
 
 concurrency:
   group: complete-library-publication
   cancel-in-progress: false
 
 jobs:
-  publish:
+  originals:
+    name: Original models (${{ matrix.release }})
     runs-on: ubuntu-latest
     timeout-minutes: 360
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix:
+        release: [zara-models-01, zara-models-02, hm-models-01, hm-models-02]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Transfer and verify this original model group
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TRANSFER_MANIFEST_URL: ${{ inputs.transfer_manifest_url }}
+          PUBLISH_PHASE: originals
+          MODEL_RELEASE: ${{ matrix.release }}
+        run: python3 .github/scripts/publish-library.py
+  publish:
+    needs: originals
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    permissions:
+      contents: write
+      pages: write
+      id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
-      - name: Transfer and verify all approved originals and web assets
+      - name: Verify all originals and transfer the web assets
         env:
           GH_TOKEN: ${{ github.token }}
           TRANSFER_MANIFEST_URL: ${{ inputs.transfer_manifest_url }}
+          PUBLISH_PHASE: web
         run: python3 .github/scripts/publish-library.py
       - name: Configure Pages
         uses: actions/configure-pages@v5
