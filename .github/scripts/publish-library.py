@@ -22,6 +22,22 @@ ORIGIN = urllib.parse.urlsplit(MANIFEST_URL)
 if ORIGIN.scheme != 'https' or not ORIGIN.hostname.endswith('.trycloudflare.com'):
     raise ValueError('Expected the approved temporary HTTPS transfer source')
 SOURCE = ORIGIN.scheme + '://' + ORIGIN.netloc
+SOURCES = [SOURCE]
+for value in os.environ.get('TRANSFER_SOURCE_URLS', '').split(','):
+    if not value.strip():
+        continue
+    origin = urllib.parse.urlsplit(value.strip())
+    if (origin.scheme != 'https' or not re.fullmatch(r'[a-z0-9-]+\.trycloudflare\.com', origin.hostname or '')
+            or origin.username or origin.password or origin.port
+            or origin.path not in {'', '/'} or origin.query or origin.fragment):
+        raise ValueError('Unexpected additional temporary transfer source')
+    value = origin.scheme + '://' + origin.netloc
+    if value not in SOURCES:
+        SOURCES.append(value)
+if len(SOURCES) > 3:
+    raise ValueError('At most three approved temporary sources are supported')
+SOURCE_LOCK = threading.Lock()
+SOURCE_ACTIVE = [0] * len(SOURCES)
 TOKEN = os.environ['GH_TOKEN']
 PHASE = os.environ.get('PUBLISH_PHASE', 'all')
 SELECTED_RELEASE = os.environ.get('MODEL_RELEASE')
@@ -94,6 +110,23 @@ def request(url, data=None, method='GET', api=False, binary=False):
             if attempt == 5:
                 raise RuntimeError('Transfer timed out: ' + urllib.parse.urlsplit(url).path) from None
             time.sleep(min(30, 2 ** attempt))
+
+def source_binary(row):
+    attempted = set()
+    while len(attempted) < len(SOURCES):
+        with SOURCE_LOCK:
+            selected = min((i for i in range(len(SOURCES)) if i not in attempted), key=lambda i: SOURCE_ACTIVE[i])
+            SOURCE_ACTIVE[selected] += 1
+        attempted.add(selected)
+        try:
+            return request(SOURCES[selected] + row['path'], binary=True)
+        except RuntimeError:
+            if len(attempted) == len(SOURCES):
+                raise
+            print('Retrying through another approved temporary source.', flush=True)
+        finally:
+            with SOURCE_LOCK:
+                SOURCE_ACTIVE[selected] -= 1
 
 def manifest():
     result = request(MANIFEST_URL)
@@ -173,7 +206,7 @@ for group in work_groups:
 
 def transfer(task):
     release, row = task
-    body = request(SOURCE + row['path'], binary=True)
+    body = source_binary(row)
     if row['encoding'] == 'gzip':
         body = gzip.decompress(body)
     else:
@@ -194,7 +227,7 @@ scope_total = sum(len(group['models']) for group in work_groups)
 if PHASE == 'web' and tasks:
     raise ValueError('Web publication requires every original to be verified first')
 print(f'Already verified {len(receipts)} originals; transferring {len(tasks)}. Scope: {SELECTED_RELEASE or "all releases"}.', flush=True)
-with cf.ThreadPoolExecutor(max_workers=8) as pool:
+with cf.ThreadPoolExecutor(max_workers=12) as pool:
     futures = [pool.submit(transfer, task) for task in tasks]
     try:
       for future in cf.as_completed(futures):
@@ -247,7 +280,7 @@ def download_web(row):
     if destination.is_file() and destination.stat().st_size == row['bytes']:
         if hashlib.sha256(destination.read_bytes()).hexdigest() == row['sha256']:
             return row
-    body = request(SOURCE + row['path'], binary=True)
+    body = source_binary(row)
     if len(body) != row['bytes'] or hashlib.sha256(body).hexdigest() != row['sha256']:
         raise ValueError('Web asset integrity mismatch: ' + row['filename'])
     destination.parent.mkdir(parents=True, exist_ok=True)
@@ -261,7 +294,7 @@ git('config', 'user.name', 'github-actions[bot]')
 git('config', 'user.email', '41898282+github-actions[bot]@users.noreply.github.com')
 packs = [row for row in rows if row['kind'] == 'pack']
 pending, size = [], 0
-with cf.ThreadPoolExecutor(max_workers=8) as pool:
+with cf.ThreadPoolExecutor(max_workers=12) as pool:
     for row in pool.map(download_web, packs):
         pending.append(row['filename'])
         size += row['bytes']
@@ -278,7 +311,7 @@ if pending:
         git('push', 'origin', 'HEAD:main')
 
 app = [row for row in rows if row['kind'] == 'app']
-with cf.ThreadPoolExecutor(max_workers=8) as pool:
+with cf.ThreadPoolExecutor(max_workers=12) as pool:
     list(pool.map(download_web, app))
 index = json.loads(Path('model-assets.json').read_text())
 if set(index['models']) != {row['id'] for group in data['groups'] for row in group['models']}:
