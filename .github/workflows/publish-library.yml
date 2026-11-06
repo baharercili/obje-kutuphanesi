@@ -1,0 +1,42 @@
+name: Publish complete library
+
+on:
+  workflow_dispatch:
+    inputs:
+      transfer_manifest_url:
+        description: Temporary source manifest for the approved public files
+        required: true
+        type: string
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: complete-library-publication
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Transfer and verify all approved originals and web assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TRANSFER_MANIFEST_URL: ${{ inputs.transfer_manifest_url }}
+        run: python3 .github/scripts/publish-library.py
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+      - name: Upload browser app
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      - name: Deploy browser app
+        id: deployment
+        uses: actions/deploy-pages@v5
