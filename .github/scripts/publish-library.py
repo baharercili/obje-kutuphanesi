@@ -109,8 +109,13 @@ def manifest():
     for row in rows:
         if not re.fullmatch('[a-f0-9]{64}', row['sha256']):
             raise ValueError('Invalid source checksum')
-        expected = '/originals/' + row['sha256'] + '/' + urllib.parse.quote(row['filename']) + '.gz'
-        if row['path'] != expected or row.get('encoding') != 'gzip' or Path(row['filename']).name != row['filename']:
+        if row.get('encoding') == 'gzip':
+            expected = '/originals/' + row['sha256'] + '/' + urllib.parse.quote(row['filename']) + '.gz'
+        elif row.get('encoding') == 'glbpkt1':
+            expected = '/lossless/' + row['sha256'] + '/' + urllib.parse.quote(row['filename']) + '.glbpkt'
+        else:
+            raise ValueError('Unsupported lossless transport')
+        if row['path'] != expected or Path(row['filename']).name != row['filename']:
             raise ValueError('Unexpected source path')
     return result
 
@@ -162,7 +167,14 @@ for group in data['groups']:
 def transfer(task):
     release, row = task
     body = request(SOURCE + row['path'], binary=True)
-    body = gzip.decompress(body)
+    if row['encoding'] == 'gzip':
+        body = gzip.decompress(body)
+    else:
+        decoded = subprocess.run(['node', '.github/scripts/decode-packet.mjs', '--module-root', '.github/scripts/vendor',
+                                  '--expected-sha256', row['sha256']], input=body, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=120)
+        if decoded.returncode:
+            raise ValueError('Lossless decoding failed for ' + row['filename'] + ': ' + decoded.stderr.decode('utf8', errors='replace')[-1500:])
+        body = decoded.stdout
     if len(body) != row['bytes'] or hashlib.sha256(body).hexdigest() != row['sha256']:
         raise ValueError('Source integrity mismatch: ' + row['filename'])
     url = release['upload_url'].split('{')[0] + '?name=' + urllib.parse.quote(row['filename'])
