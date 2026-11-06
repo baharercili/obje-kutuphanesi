@@ -23,6 +23,10 @@ if ORIGIN.scheme != 'https' or not ORIGIN.hostname.endswith('.trycloudflare.com'
     raise ValueError('Expected the approved temporary HTTPS transfer source')
 SOURCE = ORIGIN.scheme + '://' + ORIGIN.netloc
 TOKEN = os.environ['GH_TOKEN']
+PHASE = os.environ.get('PUBLISH_PHASE', 'all')
+SELECTED_RELEASE = os.environ.get('MODEL_RELEASE')
+if PHASE not in {'all', 'originals', 'web'}:
+    raise ValueError('Invalid publication phase')
 if os.environ.get('GITHUB_REPOSITORY') != REPOSITORY:
     raise ValueError('Unexpected destination repository')
 API = 'https://api.github.com/repos/' + REPOSITORY
@@ -133,9 +137,12 @@ def verified(asset, row):
             and asset.get('digest') == 'sha256:' + row['sha256'])
 
 data = manifest()
+work_groups = [group for group in data['groups'] if not SELECTED_RELEASE or group['tag'] == SELECTED_RELEASE]
+if not work_groups or (SELECTED_RELEASE and PHASE != 'originals'):
+    raise ValueError('Invalid release selection')
 existing_releases = request(API + '/releases?per_page=100', api=True)
 releases, tasks, receipts = {}, [], []
-for group in data['groups']:
+for group in work_groups:
     tag = group['tag']
     release = next((item for item in existing_releases if item['tag_name'] == tag), None)
     if release is None:
@@ -183,20 +190,23 @@ def transfer(task):
         raise ValueError('Uploaded asset integrity mismatch: ' + row['filename'])
     return {'id': row['id'], 'sha256': row['sha256'], 'asset_id': asset['id']}
 
-print(f'Already verified {len(receipts)} originals; transferring {len(tasks)}.', flush=True)
+scope_total = sum(len(group['models']) for group in work_groups)
+if PHASE == 'web' and tasks:
+    raise ValueError('Web publication requires every original to be verified first')
+print(f'Already verified {len(receipts)} originals; transferring {len(tasks)}. Scope: {SELECTED_RELEASE or "all releases"}.', flush=True)
 with cf.ThreadPoolExecutor(max_workers=8) as pool:
     futures = [pool.submit(transfer, task) for task in tasks]
     try:
       for future in cf.as_completed(futures):
         receipts.append(future.result())
         if len(receipts) % 25 == 0:
-            print(f'Originals verified: {len(receipts)}/2609', flush=True)
+            print(f'Originals verified: {len(receipts)}/{scope_total}', flush=True)
     except BaseException:
         for future in futures:
             future.cancel()
         raise
 
-for group in data['groups']:
+for group in work_groups:
     release = releases[group['tag']]
     uploaded = assets(release)
     if len(uploaded) != len(group['models']) or any(not verified(uploaded.get(row['filename'], {}), row) for row in group['models']):
@@ -204,6 +214,10 @@ for group in data['groups']:
     if release['draft']:
         request(release['url'], {'draft': False, 'make_latest': 'false'}, method='PATCH', api=True)
     print('Published and verified ' + group['tag'], flush=True)
+
+if PHASE == 'originals':
+    print(f'Release complete: {len(receipts)}/{scope_total} originals verified.', flush=True)
+    sys.exit(0)
 
 # The owner enables this manifest only after all local previews and audits pass.
 for attempt in range(360):
