@@ -147,6 +147,10 @@ for group in data['groups']:
         prior = uploaded.get(row['filename'])
         if prior and verified(prior, row):
             receipts.append({'id': row['id'], 'sha256': row['sha256'], 'asset_id': prior['id']})
+        elif prior and prior.get('state') == 'starter' and prior.get('digest') is None and prior['id'] == 715282711:
+            # Incomplete placeholder created by this task's cancelled browser upload.
+            request(prior['url'], method='DELETE', api=True)
+            tasks.append((release, row))
         elif prior:
             raise ValueError('Existing asset does not match the approved original: ' + row['filename'])
         else:
