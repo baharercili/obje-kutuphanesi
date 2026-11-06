@@ -7,6 +7,11 @@ on:
         description: Temporary source manifest for the approved public files
         required: true
         type: string
+      transfer_source_urls:
+        description: Additional approved temporary sources (comma separated)
+        required: false
+        default: ''
+        type: string
 
 permissions:
   contents: read
@@ -33,6 +38,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           TRANSFER_MANIFEST_URL: ${{ inputs.transfer_manifest_url }}
+          TRANSFER_SOURCE_URLS: ${{ inputs.transfer_source_urls }}
           PUBLISH_PHASE: originals
           MODEL_RELEASE: ${{ matrix.release }}
         run: python3 .github/scripts/publish-library.py
@@ -53,6 +59,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           TRANSFER_MANIFEST_URL: ${{ inputs.transfer_manifest_url }}
+          TRANSFER_SOURCE_URLS: ${{ inputs.transfer_source_urls }}
           PUBLISH_PHASE: web
         run: python3 .github/scripts/publish-library.py
       - name: Configure Pages
