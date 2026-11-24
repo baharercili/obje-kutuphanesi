@@ -1,4 +1,4 @@
-import {mountVaseViewer} from './viewer.js';
+import {mountVaseViewer} from './viewer.js?v=20261124';
 import {mountReferenceGallery} from './reference-gallery.js';
 import {extendHmInventory,hmMarketLabel} from './collection-data.js';
 import {mountPhysicalRenderGallery} from './physical-render-gallery.js';

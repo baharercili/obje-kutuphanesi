@@ -1,4 +1,4 @@
-import { mountVaseViewer } from './viewer.js';
+import { mountVaseViewer } from './viewer.js?v=20261124';
 import { mountReferenceGallery } from './reference-gallery.js';
 
 const root=document.getElementById('vase-app');

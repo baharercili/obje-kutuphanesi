@@ -33,12 +33,6 @@ export async function mountVaseViewer(options = {}) {
     element?.addEventListener(event, callback, settings);
     cleanups.push(() => element?.removeEventListener(event, callback, settings));
   };
-  const fail = error => {
-    loading.hidden = false;
-    loading.textContent = 'Modeller görüntülenemedi. Sayfayı yenileyin.';
-    loading.setAttribute('role', 'alert'); stage.setAttribute('aria-busy', 'false');
-    root.dataset.error = String(error.message || error);
-  };
   let config = options.config;
   if (!config && options.configUrl) {
     const response = await fetch(options.configUrl);
@@ -111,12 +105,10 @@ export async function mountVaseViewer(options = {}) {
     if (resultsCount) resultsCount.textContent = matches.length + ' model';
     root.dataset.visibleModels = String(select.options.length);
   }
-  let THREE;
-  try { THREE = await import(options.threeUrl || 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js'); }
-  catch (error) { fail(error); throw error; }
+  let THREE, graphicsReady=false;
 let renderer,scene,camera,currentGroup,floor,contactShadow,keyLight;
 let currentId=config.models[0].id;
-let yaw=.58,pitch=.21,viewScale=1,target=new THREE.Vector3();
+let yaw=.58,pitch=.21,viewScale=1,target;
 let renderQueued=false,saveTimer;
 const groups=new Map(),textures=new Map(),pointers=new Map();
 const masters=new Map(),masterRequests=new Map();
@@ -378,9 +370,9 @@ function cameraProjection() {
   camera.lookAt(target);
 }
 function draw() {
-  if(disposed||!renderer||renderQueued)return;
+  if(disposed||!graphicsReady||!renderer||renderQueued)return;
   renderQueued=true;
-  requestAnimationFrame(()=>{renderQueued=false;if(disposed)return;cameraProjection();renderer.render(scene,camera);});
+  requestAnimationFrame(()=>{renderQueued=false;if(disposed||!graphicsReady)return;cameraProjection();renderer.render(scene,camera);});
 }
 function selectModel(id,persist=true,reset=true) {
   const model=modelFor(id);currentId=model.id;
@@ -392,8 +384,10 @@ function selectModel(id,persist=true,reset=true) {
   }
   select.value=currentId;
   fillSceneVariants(model);
-  if(options.loadMasters&&masters.has(currentId))activateMaster(masters.get(currentId),model);else activateGroup(previewFor(model));
-  displayDimensions(model,options.loadMasters?masters.get(currentId)?.group:null);
+  if(graphicsReady){
+    if(options.loadMasters&&masters.has(currentId))activateMaster(masters.get(currentId),model);else activateGroup(previewFor(model));
+  }
+  displayDimensions(model,graphicsReady&&options.loadMasters?masters.get(currentId)?.group:null);
   sizeOrigin.textContent=sizeSourceLabel(model);
   sourceNotes.textContent=(model.source_notes||[]).join(' ');
   const sizeUrl=(model.size_source_urls||[]).find(url=>typeof url==='string'&&/^https:\/\//i.test(url));
@@ -439,7 +433,7 @@ function selectModel(id,persist=true,reset=true) {
   const detail={model,category:model.category,id:currentId};
   root.dispatchEvent(new CustomEvent('vase:modelchange',{detail}));
   options.onModelChange?.(model);
-  requestMaster(model,generation);
+  if(graphicsReady)requestMaster(model,generation);
 }
 
 function restoreState(saved) {
@@ -551,7 +545,34 @@ function makeContactShadow(){
   ctx.fillStyle=gradient;ctx.fillRect(0,0,128,128);
   const texture=new THREE.CanvasTexture(image);const mesh=new THREE.Mesh(new THREE.PlaneGeometry(1,1),new THREE.MeshBasicMaterial({map:texture,transparent:true,depthWrite:false}));mesh.rotation.x=-Math.PI/2;return mesh;
 }
+function initCatalog() {
+  fillModelOptions(categorySelect.value);
+  selectModel(options.initialModel||defaultModel.id,false);restoreState(readState());
+  listen(select,'change',()=>selectModel(select.value));
+  listen(categorySelect,'change',()=>{if(search)search.value='';fillModelOptions(categorySelect.value);if(select.value)selectModel(select.value);});
+  listen(search,'input',()=>{fillModelOptions(categorySelect.value);if(!Array.from(select.options).some(option=>option.value===currentId))select.value='';});
+  listen(modelList,'click',event=>{const button=event.target.closest('[data-model-id]');if(button&&modelList.contains(button)&&modelsById.has(button.dataset.modelId))selectModel(button.dataset.modelId);});
+  root.dataset.loaded='true';root.dataset.modelCount=String(config.models.length);
+  root.dataset.previewQuality=String(config.quality);root.dataset.batchId=config.batchId;
+}
+function showGraphicsUnavailable(error) {
+  graphicsReady=false;masterGeneration++;
+  root.dataset.graphicsStatus='unavailable';root.dataset.graphicsError=String(error.message||error);
+  root.dataset.masterStatus='unavailable';stage.setAttribute('aria-busy','false');
+  canvas.hidden=true;canvas.setAttribute('aria-hidden','true');
+  const message=document.createElement('p');
+  message.textContent='Bu tarayıcı 3D görünümü başlatamadı. Ürün fotoğraflarını inceleyebilir ve tam GLB dosyasını indirebilirsin. 3D için sayfayı Safari veya Chrome’da açabilirsin.';
+  const retry=document.createElement('button');retry.type='button';retry.textContent='3D görünümü yeniden dene';
+  listen(retry,'click',()=>location.reload());
+  loading.replaceChildren(message,retry);loading.classList.add('graphics-unavailable');loading.hidden=false;loading.setAttribute('role','status');
+  root.querySelectorAll('[data-rotate],[data-zoom],[data-reset]').forEach(button=>{button.disabled=true;});
+  if(variantSelect)variantSelect.disabled=true;
+  const note=stage.querySelector('.stage-note');if(note)note.hidden=true;
+  const quality=root.querySelector('[data-model-quality]');if(quality)quality.textContent='Fotoğraf ve GLB';
+}
 async function init() {
+  THREE=await import(options.threeUrl || 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js');
+  target=new THREE.Vector3();
   renderer=new THREE.WebGLRenderer({canvas,alpha:true,antialias:true,powerPreference:'low-power'});
   if(options.selfShadows){renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;}
   renderer.setPixelRatio(Math.min(devicePixelRatio||1,2));renderer.setClearColor(0,0);
@@ -566,11 +587,10 @@ async function init() {
   if(options.selfShadows){key.castShadow=true;key.shadow.mapSize.set(2048,2048);key.shadow.bias=-.00001;scene.add(key.target);}
   const fill=new THREE.DirectionalLight(0xffffff,options.fitAllModels?.35:.8);fill.position.set(3,2,-1);scene.add(fill);
   previewBuffer=await geometryBuffer();
-  fillModelOptions(categorySelect.value);
-  selectModel(options.initialModel||defaultModel.id,false);restoreState(readState());
+  graphicsReady=true;root.dataset.graphicsStatus='ready';
+  selectModel(currentId,false,false);
   const resize=()=>{renderer.setSize(Math.max(stage.clientWidth,1),Math.max(stage.clientHeight,1),false);draw();};
   const resizeObserver=new ResizeObserver(resize);resizeObserver.observe(stage);cleanups.push(()=>resizeObserver.disconnect());resize();
-  listen(select,'change',()=>selectModel(select.value));
   listen(variantSelect,'change',()=>{
     const model=modelFor(currentId),index=Number(variantSelect.value);
     if(!model.scene_variants?.some(variant=>variant.index===index))return;
@@ -578,9 +598,6 @@ async function init() {
     const entry=masters.get(model.id);if(entry)activateMaster(entry,model);
     const variant=model.scene_variants.find(item=>item.index===index);announcement.textContent=model.name+' · '+variant.label;saveState();
   });
-  listen(categorySelect,'change',()=>{if(search)search.value='';fillModelOptions(categorySelect.value);if(select.value)selectModel(select.value);});
-  listen(search,'input',()=>{fillModelOptions(categorySelect.value);if(!Array.from(select.options).some(option=>option.value===currentId))select.value='';});
-  listen(modelList,'click',event=>{const button=event.target.closest('[data-model-id]');if(button&&modelList.contains(button)&&modelsById.has(button.dataset.modelId))selectModel(button.dataset.modelId);});
   listen(get('reset','[data-reset]'),'click',()=>selectModel(currentId));
   root.querySelectorAll('[data-rotate]').forEach(button=>listen(button,'click',()=>{yaw+=(button.dataset.rotate==='left'?1:-1)*Math.PI/6;draw();saveState();}));
   root.querySelectorAll('[data-zoom]').forEach(button=>listen(button,'click',()=>zoomBy(button.dataset.zoom==='in'?.82:1.22)));
@@ -608,7 +625,7 @@ async function init() {
   listen(canvas,'contextmenu',event=>event.preventDefault());listen(canvas,'dragstart',event=>event.preventDefault());
   const themeObserver=new MutationObserver(applyTheme);themeObserver.observe(document.documentElement,{attributes:true,attributeFilter:['class','style','data-theme']});cleanups.push(()=>themeObserver.disconnect());
   listen(matchMedia('(prefers-color-scheme: dark)'),'change',applyTheme);applyTheme();
-  listen(canvas,'webglcontextlost',event=>{event.preventDefault();loading.hidden=false;loading.textContent='Görüntü duraklatıldı. Yeniden açın.';loading.setAttribute('role','alert');});
+  listen(canvas,'webglcontextlost',event=>{event.preventDefault();showGraphicsUnavailable(new Error('3D bağlantısı kesildi.'));});
   loading.hidden=root.dataset.masterStatus!=='loading';stage.setAttribute('aria-busy',String(root.dataset.masterStatus==='loading'));root.dataset.loaded='true';root.dataset.modelCount=String(config.models.length);
   root.dataset.triangles=String(config.models.reduce((sum,model)=>sum+model.meshes.reduce((count,mesh)=>count+mesh.triangles,0),0));
   root.dataset.previewQuality=String(config.quality);root.dataset.batchId=config.batchId;
@@ -624,14 +641,15 @@ function dispose() {
   keyLight?.shadow?.map?.dispose();keyLight?.shadow?.mapPass?.dispose();
   renderer?.dispose();groups.clear();textures.clear();pointers.clear();previewBuffer=null;delete root.dataset.loaded;
 }
+initCatalog();
 try { await init(); }
-catch(error) { fail(error);dispose();throw error; }
+catch(error) { showGraphicsUnavailable(error);console.warn('3D görünüm başlatılamadı; katalog ve GLB indirme kullanılabilir.',error); }
 return {
   selectModel(id) { if(!disposed&&modelsById.has(id))selectModel(id); },
   selectCategory(category) { if(disposed||!categoryNames.includes(category))return;categorySelect.value=category;if(search)search.value='';fillModelOptions(category);if(select.value)selectModel(select.value); },
   getState() { return {id:currentId,category:modelFor(currentId).category,yaw,pitch,viewScale}; },
   getModel(id=currentId) { return modelsById.get(id); },
-  resize() { if(disposed)return;renderer.setSize(Math.max(stage.clientWidth,1),Math.max(stage.clientHeight,1),false);draw(); },
+  resize() { if(disposed||!graphicsReady)return;renderer.setSize(Math.max(stage.clientWidth,1),Math.max(stage.clientHeight,1),false);draw(); },
   dispose
 };
 }

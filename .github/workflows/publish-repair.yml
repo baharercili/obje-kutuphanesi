@@ -1,0 +1,70 @@
+name: Publish catalog and download repair
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - viewer.js
+      - style.css
+      - app.js
+      - hmhome.js
+      - zarahome.html
+      - hmhome.html
+      - .github/workflows/publish-repair.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: complete-library-publication
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /*
+            !/models/
+      - name: Validate catalogs and package browser app
+        run: |
+          node --check viewer.js
+          node --check app.js
+          node --check hmhome.js
+          python3 - <<'PY'
+          import json, shutil
+          from pathlib import Path
+          root = Path('.')
+          index = json.loads((root/'full-model-index.json').read_text())
+          assets = json.loads((root/'model-assets.json').read_text())
+          for name in ['catalog.json', 'hmhome-catalog.json']:
+              models = json.loads((root/name).read_text())
+              for model in models:
+                  assert model['glb_url'] == index[model['id']]['download_url']
+                  assert model['id'] in assets['models']
+          out = root/'_site'
+          out.mkdir(exist_ok=True)
+          for source in root.iterdir():
+              if source.is_file() and (source.suffix in {'.html', '.css', '.js', '.json'} or source.name == '.nojekyll'):
+                  shutil.copy2(source, out/source.name)
+          print('Packaged browser app; originals remain in Releases and previews on the existing raw asset host.')
+          PY
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      - name: Publish browser app
+        id: deployment
+        uses: actions/deploy-pages@v5
