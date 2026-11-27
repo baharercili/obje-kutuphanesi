@@ -1,0 +1,32 @@
+name: Complete project archive
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/archive-project.yml
+      - backups/archive-project.py
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: complete-project-archive
+  cancel-in-progress: false
+
+jobs:
+  archive:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /*
+            !/models/
+      - name: Archive original product photography and verify backups
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 backups/archive-project.py

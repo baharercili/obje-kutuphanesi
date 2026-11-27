@@ -17,3 +17,7 @@ Tarayıcıda kullanılan önizlemeler ayrı hazırlanmıştır. İndirilebilir �
 Uygulama GitHub Pages üzerinde çalışır; bilgisayarda açık bir sunucuya ihtiyaç duymaz. Orijinal ürün görselleri ve marka adları ilgili sahiplerine aittir.
 
 Kırlentler ve halılar korunmuştur. Diğer ev tekstili ürünleri uygulama kapsamından çıkarılmıştır.
+
+## Tam proje yedeği
+
+Web kaynakları, 2.609 tam GLB modeli (28,06 GB), 937 model üretim dosyası ve referans fotoğraf arşivinin konumları [backups/README.md](backups/README.md) içinde açıklanır. Fotoğraf aktarımının doğrulanmış sonucu ve varsa erişilemeyen kaynaklar `backups/complete-project-manifest.json` dosyasında kaydedilir.
